@@ -1,10 +1,27 @@
+version: '3.8'
 services:
   db:
     image: pgvector/pgvector:pg16
-    container_name: job_platform_db
+    environment:
+      POSTGRES_DB: job_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./demo
+    ports:
+      - "8080:8080"
     environment:
-      - POSTGRES_DB=job_db
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/job_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: password
+      GROQ_API_KEY: ${GROQ_API_KEY}
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
