@@ -7,7 +7,6 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +19,7 @@ public class AdviceService {
 
     @Autowired private VectorStore vectorStore;
 
-    public AdviceService(@Qualifier("openAiChatModel") ChatModel chatModel) {
+    public AdviceService(ChatModel chatModel) {
         this.chatClient = ChatClient.builder(chatModel).build();
     }
 
