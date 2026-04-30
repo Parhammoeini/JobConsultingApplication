@@ -27,7 +27,6 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-ollama-spring-boot-starter'
     implementation 'org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter'
     implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
-    implementation 'org.springframework.ai:spring-ai-transformers-spring-boot-starter'
     implementation 'org.apache.tika:tika-core:2.9.1'
     implementation 'org.apache.tika:tika-parsers-standard-package:2.9.1'
     compileOnly 'org.projectlombok:lombok'
