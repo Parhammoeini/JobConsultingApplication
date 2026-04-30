@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.retry.support.RetryTemplate;
 
 @Configuration
 public class AiConfig {
@@ -48,6 +49,6 @@ public class AiConfig {
             OpenAiEmbeddingOptions.builder()
                 .model("sentence-transformers/all-MiniLM-L6-v2")
                 .build(),
-            null);
+            RetryTemplate.defaultInstance());
     }
 }
