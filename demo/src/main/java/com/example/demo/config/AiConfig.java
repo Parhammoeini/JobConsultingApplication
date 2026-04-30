@@ -1,46 +1,52 @@
 package com.example.demo.config;
 
 import org.springframework.ai.embedding.EmbeddingModel;
-import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.OpenAiEmbeddingModel;
+import org.springframework.ai.openai.OpenAiEmbeddingOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration
 public class AiConfig {
 
-    // This pulls the dimension size from your properties file (1024 for Ollama, 1536 for OpenAI)
-    @Value("${spring.ai.vectorstore.pgvector.dimensions:1024}")
-    private int dimensions;
+    @Value("${groq.api.key}")
+    private String groqApiKey;
+
+    @Value("${huggingface.api.key}")
+    private String huggingfaceApiKey;
 
     @Bean
     @Primary
-    public VectorStore vectorStore(
-        JdbcTemplate jdbcTemplate, 
-        @Qualifier("openAiEmbeddingModel") EmbeddingModel embeddingModel) { // Force OpenAI here
-    
-    return PgVectorStore.builder(jdbcTemplate, embeddingModel)
-            .dimensions(dimensions)
-            .initializeSchema(true)
+    public OpenAiChatModel chatModel() {
+        OpenAiApi groqApi = OpenAiApi.builder()
+            .baseUrl("https://api.groq.com/openai")
+            .apiKey(groqApiKey)
             .build();
-}
+        return OpenAiChatModel.builder()
+            .openAiApi(groqApi)
+            .defaultOptions(OpenAiChatOptions.builder()
+                .model("llama-3.3-70b-versatile")
+                .build())
+            .build();
+    }
 
     @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:5173") // Matches Vite's default port
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
-            }
-        };
+    @Primary
+    public EmbeddingModel embeddingModel() {
+        OpenAiApi hfApi = OpenAiApi.builder()
+            .baseUrl("https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2")
+            .apiKey(huggingfaceApiKey)
+            .build();
+        return new OpenAiEmbeddingModel(hfApi,
+            null,
+            OpenAiEmbeddingOptions.builder()
+                .model("sentence-transformers/all-MiniLM-L6-v2")
+                .build(),
+            null);
     }
 }
