@@ -1,1 +1,5 @@
 demo/src/main/resources/application.properties
+.vercel
+demo/build/
+demo/.gradle/
+node_modules/
