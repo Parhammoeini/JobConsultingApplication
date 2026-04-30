@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 
-const API_BASE = "http://localhost:8080/api/resumes";
-const AUTH_BASE = "http://localhost:8080/api/auth";
+const API_BASE = "https://jobconsultingapplication-production.up.railway.app/api/resumes";
+const AUTH_BASE = "https://jobconsultingapplication-production.up.railway.app/api/auth";
 
 const BrainIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
