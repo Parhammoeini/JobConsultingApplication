@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
@@ -43,7 +44,7 @@ public class AiConfig {
             .apiKey(huggingfaceApiKey)
             .build();
         return new OpenAiEmbeddingModel(hfApi,
-            null,
+            MetadataMode.EMBED,
             OpenAiEmbeddingOptions.builder()
                 .model("sentence-transformers/all-MiniLM-L6-v2")
                 .build(),
