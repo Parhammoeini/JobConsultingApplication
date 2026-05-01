@@ -1,6 +1,5 @@
 package com.example.demo.config;
 
-import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
@@ -16,38 +15,37 @@ import org.springframework.retry.support.RetryTemplate;
 @Configuration
 public class AiConfig {
 
+    @Value("${spring.ai.openai.api-key}")
+    private String openaiApiKey;
+
     @Value("${groq.api.key}")
     private String groqApiKey;
-
-    @Value("${huggingface.api.key}")
-    private String huggingfaceApiKey;
 
     @Bean
     @Primary
     public OpenAiChatModel chatModel() {
+        // Points to Groq
         OpenAiApi groqApi = OpenAiApi.builder()
             .baseUrl("https://api.groq.com/openai")
             .apiKey(groqApiKey)
             .build();
-        return OpenAiChatModel.builder()
-            .openAiApi(groqApi)
-            .defaultOptions(OpenAiChatOptions.builder()
+            
+        return new OpenAiChatModel(groqApi, OpenAiChatOptions.builder()
                 .model("llama-3.3-70b-versatile")
-                .build())
-            .build();
+                .build());
     }
 
     @Bean
-    @Primary
     public EmbeddingModel embeddingModel() {
-        OpenAiApi hfApi = OpenAiApi.builder()
-            .baseUrl("https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2")
-            .apiKey(huggingfaceApiKey)
+        // Points to OpenAI (Standard)
+        OpenAiApi openAiApi = OpenAiApi.builder()
+            .apiKey(openaiApiKey)
             .build();
-        return new OpenAiEmbeddingModel(hfApi,
-            MetadataMode.EMBED,
+
+        return new OpenAiEmbeddingModel(openAiApi,
+            org.springframework.ai.document.MetadataMode.EMBED,
             OpenAiEmbeddingOptions.builder()
-                .model("sentence-transformers/all-MiniLM-L6-v2")
+                .model("text-embedding-3-small")
                 .build(),
             RetryTemplate.defaultInstance());
     }
