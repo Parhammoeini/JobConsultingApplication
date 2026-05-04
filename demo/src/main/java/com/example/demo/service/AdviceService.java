@@ -20,10 +20,13 @@ public class AdviceService {
     @Autowired private VectorStore vectorStore;
 
     public AdviceService(ChatModel chatModel) {
+        System.out.println("DEBUG AdviceService - ChatModel class: " + chatModel.getClass().getName());
         this.chatClient = ChatClient.builder(chatModel).build();
     }
 
     public String getAdvice(String query, String candidate) {
+        System.out.println("DEBUG AdviceService - getAdvice called for: " + candidate);
+
         SearchRequest.Builder requestBuilder = SearchRequest.builder()
             .query(query)
             .topK(5);
@@ -34,6 +37,7 @@ public class AdviceService {
         }
 
         List<Document> docs = vectorStore.similaritySearch(requestBuilder.build());
+        System.out.println("DEBUG AdviceService - Found " + docs.size() + " docs");
 
         String context = docs.stream()
             .map(Document::getText)
@@ -44,13 +48,15 @@ public class AdviceService {
             Candidate: %s
             Context from their resume:
             %s
-            
             Answer this question specifically about this candidate: %s
             """.formatted(candidate != null ? candidate : "Unknown", context, query);
 
-        return chatClient.prompt()
+        System.out.println("DEBUG AdviceService - Calling chat model...");
+        String result = chatClient.prompt()
             .user(prompt)
             .call()
             .content();
+        System.out.println("DEBUG AdviceService - Got response!");
+        return result;
     }
 }
