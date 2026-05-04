@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
@@ -15,7 +16,7 @@ import org.springframework.retry.support.RetryTemplate;
 @Configuration
 public class AiConfig {
 
-    @Value("${spring.ai.openai.api-key}")
+    @Value("${openai.api.key}")
     private String openaiApiKey;
 
     @Value("${groq.api.key}")
@@ -24,26 +25,24 @@ public class AiConfig {
     @Bean
     @Primary
     public OpenAiChatModel chatModel() {
-        // Points to Groq
+        System.out.println("DEBUG AiConfig - Groq key starts with: " + groqApiKey.substring(0, 10));
         OpenAiApi groqApi = OpenAiApi.builder()
             .baseUrl("https://api.groq.com/openai")
             .apiKey(groqApiKey)
             .build();
-            
         return new OpenAiChatModel(groqApi, OpenAiChatOptions.builder()
-                .model("llama-3.3-70b-versatile")
-                .build());
+            .model("llama-3.3-70b-versatile")
+            .build());
     }
 
     @Bean
     public EmbeddingModel embeddingModel() {
-        // Points to OpenAI (Standard)
+        System.out.println("DEBUG AiConfig - OpenAI key starts with: " + openaiApiKey.substring(0, 10));
         OpenAiApi openAiApi = OpenAiApi.builder()
             .apiKey(openaiApiKey)
             .build();
-
         return new OpenAiEmbeddingModel(openAiApi,
-            org.springframework.ai.document.MetadataMode.EMBED,
+            MetadataMode.EMBED,
             OpenAiEmbeddingOptions.builder()
                 .model("text-embedding-3-small")
                 .build(),
