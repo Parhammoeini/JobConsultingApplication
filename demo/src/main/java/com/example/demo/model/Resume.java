@@ -16,10 +16,10 @@ public class Resume {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String candidateName;
+    private String userEmail;
 
     @Column(columnDefinition = "TEXT")
     private String content;
-
     private LocalDateTime uploadedAt;
 
     @PrePersist

@@ -16,28 +16,21 @@ import java.util.stream.Collectors;
 public class AdviceService {
 
     private final ChatClient chatClient;
-
     @Autowired private VectorStore vectorStore;
 
     public AdviceService(ChatModel chatModel) {
-        System.out.println("DEBUG AdviceService - ChatModel class: " + chatModel.getClass().getName());
         this.chatClient = ChatClient.builder(chatModel).build();
     }
 
-    public String getAdvice(String query, String candidate) {
-        System.out.println("DEBUG AdviceService - getAdvice called for: " + candidate);
-
-        SearchRequest.Builder requestBuilder = SearchRequest.builder()
-            .query(query)
-            .topK(5);
-
-        if (candidate != null && !candidate.isBlank()) {
-            FilterExpressionBuilder b = new FilterExpressionBuilder();
-            requestBuilder.filterExpression(b.eq("candidateName", candidate).build());
-        }
-
-        List<Document> docs = vectorStore.similaritySearch(requestBuilder.build());
-        System.out.println("DEBUG AdviceService - Found " + docs.size() + " docs");
+    public String getAdvice(String query, String userEmail) {
+        FilterExpressionBuilder b = new FilterExpressionBuilder();
+        List<Document> docs = vectorStore.similaritySearch(
+            SearchRequest.builder()
+                .query(query)
+                .topK(5)
+                .filterExpression(b.eq("userEmail", userEmail).build())
+                .build()
+        );
 
         String context = docs.stream()
             .map(Document::getText)
@@ -45,18 +38,14 @@ public class AdviceService {
 
         String prompt = """
             You are a Senior Career Consultant.
-            Candidate: %s
-            Context from their resume:
+            Context from the user's resume:
             %s
-            Answer this question specifically about this candidate: %s
-            """.formatted(candidate != null ? candidate : "Unknown", context, query);
+            Answer this question: %s
+            """.formatted(context, query);
 
-        System.out.println("DEBUG AdviceService - Calling chat model...");
-        String result = chatClient.prompt()
+        return chatClient.prompt()
             .user(prompt)
             .call()
             .content();
-        System.out.println("DEBUG AdviceService - Got response!");
-        return result;
     }
 }
